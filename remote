@@ -1,8 +1,22 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 remote=$1
-project=$2
+project=$2 # defaults to the current directory
+
+if [ "x$project" == x ]; then
+  project=`basename $PWD`
+fi
+
+if [ "x$remote" == x ]; then
+  echo usage: remote user@hostname >&2
+  exit 1
+fi
+old=$PWD
 
 cd `dirname $BASH_SOURCE`
 tar -cz . | ssh $remote "mkdir -p .deploy; cd .deploy; tar -xz; cd ..; ./.deploy/init $project"
 echo $remote
+
+cd $old
+git remote add deploy "$remote":"$project"/git
+echo added remote deploy
