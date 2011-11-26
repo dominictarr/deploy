@@ -1,0 +1,11 @@
+{ "name": "deploy"
+, "version": "0.0.0"
+, "description": ""
+, "homepage": "http://github.com/dominictarr/deploy"
+, "repository": 
+  { "type": "git"
+  , "url": "https://github.com/dominictarr/deploy.git" }
+, "dependencies": {}
+, "devDependencies": {}
+, "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)"
+, "scripts": { "test": "meta-test test/*.js" } }

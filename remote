@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+remote=$1
+project=$2
+
+cd `dirname $BASH_SOURCE`
+tar -cz . | ssh $remote "mkdir -p .deploy; cd .deploy; tar -xz; cd ..; ./.deploy/init $project"
+echo $remote

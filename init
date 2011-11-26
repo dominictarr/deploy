@@ -1,0 +1,27 @@
+#! /usr/bin/env bash
+
+#create a git repo with this format:
+
+# project/git # git files in here
+# project/master 
+# project/...      # all branches and tags are automatically checkedout here.
+
+__dirname=`dirname $PWD/$BASH_SOURCE`
+echo $__dirname
+
+project=$1
+
+if [ "x$project" == x ]; then
+
+  echo usage: init [projectname] >&2
+  exit 1
+
+fi
+
+mkdir -p $project/git
+cd $project/git
+git init --bare
+cp $__dirname/post-receive hooks/post-receive
+
+#that should do it for here.
+#now all that is needed is add the remote.

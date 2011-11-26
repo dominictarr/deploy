@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+#when ever this script is called on a git post-recieve hook,
+#idempotently clone the pushed branch or tag to heads/$project/$branch
+
+# when a server crashes, if it's running on $branch
+# check if there is a "$branch"_stable version. and run that instead.
+# this will allow for rollbacks.
+
+# if there is no "$branch"_stable just run from $branch
+
+# what if an app crashes while the dir is being setup?
+# hmm, it will probably just crash again, and that find the stable tag.
+
+checkout () {
+  branch=$1
+
+  GITDIR=`pwd`
+  project=`basename $GITDIR` 
+  #heads=$HOME/heads
+  heads=$GITDIR/..
+  #branch_dir=$heads/$project/$branch
+  branch_dir=$GITDIR/../$branch
+  echo updating $branch_dir
+  if [ -e $branch_dir ]; then
+    cd $branch_dir; git fetch --all;
+  else
+    git clone $GITDIR $branch_dir --recursive -n;
+    cd $branch_dir;
+  fi
+  git checkout $branch --force
+  echo 'RESTART:' $heads/$project/$branch
+}
+
+while read -a line; do
+  obj=${line[2]}
+  from=${line[0]}
+  to=${line[1]}
+  case "$obj" in
+    refs/heads/* )
+      branch=${obj##refs/heads/}
+      echo BRANCH '"'$branch'"' $from $to
+      ;;
+    refs/tags/* )
+      branch=${obj##refs/tags/}
+      echo TAG $branch $from $to
+      ;;
+  esac  
+  checkout $branch
+done
