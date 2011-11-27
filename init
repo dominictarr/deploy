@@ -21,6 +21,7 @@ fi
 mkdir -p $project/git
 cd $project/git
 git init --bare
+git config --add receive.denyCurrentBranch ignore
 cp $__dirname/post-receive hooks/post-receive
 
 #that should do it for here.

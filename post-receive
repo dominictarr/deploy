@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#when ever this script is called on a git post-recieve hook,
-#idempotently clone the pushed branch or tag to heads/$project/$branch
+# when ever this script is called on a git post-recieve hook,
+# idempotently clone the pushed branch or tag to heads/$project/$branch
 
 # when a server crashes, if it's running on $branch
 # check if there is a "$branch"_stable version. and run that instead.
@@ -12,26 +12,36 @@
 # what if an app crashes while the dir is being setup?
 # hmm, it will probably just crash again, and that find the stable tag.
 
+
+
+
+
+
+
+#tidy up this mess...
+
 checkout () {
   branch=$1
 
-  GITDIR=`pwd`
-#  project=`basename $GITDIR` 
-  #heads=$HOME/heads
-  heads=$GITDIR/..
-  #branch_dir=$heads/$project/$branch
-  branch_dir=$GITDIR/../$branch
+  GIT_DIR=`pwd`
+  heads=$GIT_DIR/..
+  branch_dir=$GIT_DIR/../$branch
   echo updating $branch_dir
   if [ -e $branch_dir ]; then
     echo GIT FETCH
-    cd $branch_dir; git fetch --all;
+    cd $branch_dir
+    git --git-dir="$GIT_DIR" --work-tree=. checkout $branch --force
   else
     echo GIT CLONE
-    git clone $GITDIR $branch_dir;
-    cd $branch_dir;
+    cd ..
+    mkdir $branch
+    cd $branch
+
+    GIT_WORK_TREE=`pwd`
+    git --work-tree=. init
+    git --git-dir="$GIT_DIR" --work-tree=. checkout $branch --force
+    ls $branch
   fi
-  echo cd `pwd`";  checkout $branch --force"
-  git checkout $branch --force
   echo 'RESTART:' $heads/$branch
 }
 
@@ -48,6 +58,6 @@ while read -a line; do
       branch=${obj##refs/tags/}
       echo TAG $branch $from $to
       ;;
-  esac  
+  esac
   checkout $branch
 done

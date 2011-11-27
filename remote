@@ -3,20 +3,26 @@
 remote=$1
 project=$2 # defaults to the current directory
 
+set -e
+
 if [ "x$project" == x ]; then
   project=`basename $PWD`
 fi
+
 
 if [ "x$remote" == x ]; then
   echo usage: remote user@hostname >&2
   exit 1
 fi
+
+echo creating git repo "$remote":"$project"/git >&2
 old=$PWD
 
 cd `dirname $BASH_SOURCE`
+echo uploading scripts... >&2
 tar -cz . | ssh $remote "mkdir -p .deploy; cd .deploy; tar -xz; cd ..; ./.deploy/init $project"
-echo $remote
+echo git remote add deploy "$remote":"$project"/git
 
 cd $old
-git remote add deploy "$remote":"$project"/git
+git remote add deploy "$remote":"$project"/git || true
 echo added remote deploy

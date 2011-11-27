@@ -8,4 +8,7 @@
 , "dependencies": {}
 , "devDependencies": {}
 , "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)"
+, "bin": {
+    "remote-init": "remote"
+  }
 , "scripts": { "test": "meta-test test/*.js" } }
