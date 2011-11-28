@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+test6_boolean1=true
+test6_boolean2=false
+test6_ARG_0=a1
+test6_ARG_1=b2
+test6_key1=val1
+test6_key2=val2
