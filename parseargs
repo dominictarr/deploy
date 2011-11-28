@@ -10,7 +10,9 @@ parseargs () {
 
     case $1 in
       --no-*)
+        if [ $STATE == VAL ]; then echo =true; fi
         echo "$PREFIX"${1##--no-}=false
+        STATE=ARG
         ;;
       -*=*)
         if [ $STATE == VAL ]; then echo =true; fi

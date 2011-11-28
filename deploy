@@ -3,7 +3,7 @@
 case $1 in
   create)
     shift
-    ./remote $@
+    ./create $@
   ;;
   
   *)

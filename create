@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+. <(PREFIX=deploy_ ./parseargs $@ | tee >(cat >&2))
+
+set -e
+
+#if [ "x$deploy_server" == x ]; then deploy_server=$1; fi
+#if [ "x$deploy_project" == x ]; then deploy_project=$2; fi
+
+#deploy_project=${deploy_project:=$2}
+
+if [ "x$deploy_project" == x ]; then
+  project=`basename $PWD`
+fi
+
+expr ${deploy_server:=$1}
+expr ${deploy_remote:=deploy}
+
+if [ "x$deploy_server" == x ]; then
+  echo usage: remote user@hostname >&2
+  exit 1
+fi
+
+echo creating git repo "$deploy_server":"$deploy_project"/git >&2
+old=$PWD
+
+cd `dirname $BASH_SOURCE`
+echo uploading scripts... >&2
+tar -cz . | ssh $deploy_server "mkdir -p .deploy; cd .deploy; tar -xz; cd ..; ./.deploy/init $deploy_project"
+echo git remote add "$deploy_remote" "$remote":"$deploy_project"/git
+
+cd $old
+git remote add "$deploy_remote" "$deploy_server":"$deploy_project"/git || true
+echo added remote "$deploy_remote"
