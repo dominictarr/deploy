@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+case $1 in
+  create)
+    shift
+    ./remote $@
+  ;;
+  
+  *)
+    cat readme.markdown >&2
+  ;;
+esac

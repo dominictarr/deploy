@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+#PREFIX=TEST_
+
+parseargs () {
+  echo '#!/usr/bin/env bash'
+  STATE=ARG
+  ARG=0
+  while true; do
+
+    case $1 in
+      --no-*)
+        echo "$PREFIX"${1##--no-}=false
+        ;;
+      -*=*)
+        if [ $STATE == VAL ]; then echo =true; fi
+        echo $PREFIX`expr match $1 '--*\(.*$\)'`
+        STATE=ARG      
+        ;;
+      -*)
+        if [ $STATE == VAL ]; then echo =true; fi
+        echo -n $PREFIX`expr match $1 '--*\(.*$\)'`
+        STATE=VAL
+        ;;
+      *)
+        if [ $STATE == ARG ]; then echo -n "$PREFIX"ARG_"$ARG"; let ARG=$ARG+1; fi
+        echo =$1
+        STATE=ARG
+      ;;
+    esac
+    shift
+    if [ "x$1" == x ]; then break; fi
+  done
+
+  if [ $STATE == VAL ]; then echo =true; fi
+
+}
+
+
+if [ $0 == $BASH_SOURCE ]; then parseargs $@; fi

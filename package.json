@@ -9,6 +9,6 @@
 , "devDependencies": {}
 , "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)"
 , "bin": {
-    "remote-init": "remote"
+    "deploy": "deploy"
   }
 , "scripts": { "test": "meta-test test/*.js" } }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 remote=$1
-project=$2 # defaults to the current directory
+project=$1 # defaults to the current directory
 
 set -e
 

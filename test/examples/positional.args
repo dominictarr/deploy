@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+test4_ARG_0=a
+test4_ARG_1=b
+test4_ARG_2=c

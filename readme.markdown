@@ -1,36 +1,25 @@
-# deploy tools
+# deploy
 
-##post-recieve
+tools to create setup a server for continous deployment via git push.
 
-a post-recieve hook that clones/pulls what ever was just pushed to
-$HOME/heads/project/branch|tag
+## deploy create USER@HOST [projectname]
 
-## create remote
+create a git repo on HOST with projectname (or the basename of current dir)
 
-nah, better to copy the hook as well.
-copy this package to the remote server and install into the path.
-/usr/local/node_modules/deploy
-then link the bin scripts to
-/usr/local/bin
+and create a remote named `deploy` in the currect git repo.
 
-then it will be possible to run
-ssh root@server deploy-init proj which will create a git repo, with a install hook.
-```
-proj=`basename $PWD`
-ssh root@server << HEREDOC
-  mkdir $proj -p
-  cd $proj
-  git init --bare || true
-  ln -s `which post-recieve` hooks/post-recieve
-HEREDOC
-git add remote deploy 
+the remote repo will be setup with a post-receive hook that will checkout every branch and tag.
+this will be very useful for split testing.
 
 ```
+  project/
+    git/        #git stuff in here
+    master/     #master 
+    tag/        #tag
+```
 
-## deploy
+push to your new git repo with 
 
 ```
-# deploy script -c COMMAND
+git push deploy [branch|--tags]
 
-
-``` 

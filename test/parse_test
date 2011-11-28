@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+#. ../parseargs
+
+set -e
+
+TEST=0
+FAILURES=0
+echo 1..5
+
+testparse () {
+
+  let TEST=$TEST+1
+  file=$1
+  shift
+  
+  diff <(PREFIX=test"$TEST"_ ../parseargs $@) $file > /tmp/parse_args.err && ret=0 || ret=1
+
+  if [ $ret == '0' ]; then
+    echo ok $TEST $file
+  else 
+    echo not ok $test $file
+    cat /tmp/parse_args.err
+    let FAILURES=$FAILURES+1
+  fi
+}
+
+testparse examples/simple.args --key val
+testparse examples/boolean_true.args --boolean_true
+testparse examples/boolean_false.args --no-boolean_false
+testparse examples/positional.args a b c
+testparse examples/inline.args --key=val
+
+#diff <(PREFIX=test5_ ../parseargs --key=val) examples/inline.args
+
+case $FAILURES in
+  0) echo $TEST passed     ;;
+  *) echo $FAILURES failed ;;
+esac
+
+exit $FAILURES 
