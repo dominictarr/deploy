@@ -22,7 +22,8 @@ mkdir -p $project/git
 cd $project/git
 git init --bare
 git config --add receive.denyCurrentBranch ignore
-cp $__dirname/post-receive hooks/post-receive
+cp $__dirname/hooks/post-receive hooks/post-receive
+cp $__dirname/hooks/post-checkout hooks/post-checkout
 
 #that should do it for here.
 #now all that is needed is add the remote.
