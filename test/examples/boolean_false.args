@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-test3_boolean_false=false
+test3_boolean_false="false"

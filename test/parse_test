@@ -6,7 +6,9 @@ set -e
 
 TEST=0
 FAILURES=0
-echo 1..6
+echo 1..7
+
+. ../parseargs ## must use parse args like this, if you want spaces to come through properly
 
 testparse () {
 
@@ -14,7 +16,7 @@ testparse () {
   file=$1
   shift
   
-  diff <(PREFIX=test"$TEST"_ ../parseargs $@) $file > /tmp/parse_args.err && ret=0 || ret=1
+  diff <(PREFIX=test"$TEST"_ parseargs "$@") $file > /tmp/parse_args.err && ret=0 || ret=1
 
   if [ $ret == '0' ]; then
     echo ok $TEST $file
@@ -31,6 +33,7 @@ testparse examples/boolean_false.args --no-boolean_false
 testparse examples/positional.args a b c
 testparse examples/inline.args --key=val
 testparse examples/all.args --boolean1 --no-boolean2 a1 b2 --key1 val1 --key2 val2
+testparse examples/with-spaces.args --values "a b c"
 
 #diff <(PREFIX=test5_ ../parseargs --key=val) examples/inline.args
 

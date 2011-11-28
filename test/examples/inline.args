@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-test5_key=val
+test5_key="val"
