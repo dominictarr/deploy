@@ -1,12 +1,186 @@
 #!/usr/bin/env bash
 
-case $1 in
-  create)
-    shift
-    ./create $@
-  ;;
+# rewrite everything, with tests.
+# 
+# commands:
+# 
+# create-simple [user@host|localhost] [path]     # create a push deploy git repo at path
+# 
+# create-branches [user@host|localhost] [path]   # same as above, but checkout all branches.
+#
+# after a branch is checkedout, ./post-checkout is exectued if it exits in the repo's root.
+# also, git remote 'deploy' is created.
+# 
+# version                                        # print version and exit 0
+#
+# restart
+
+dir=`dirname "$BASH_SOURCE"`
+
+version () {
+  grep -o '"version" *: *"\([^"]*\)"' $dir/package.json
+  exit 0
+}
+
+usage () {
+  echo 'USAGE!!!'
+  exit 1
+}
+
+err () {
+  echo "$@" >&2
+  exit 1
+}
+
+#
+# expects user@host|localhost path
+#
+
+validate () {
+  local targpath="expected: deploy create branches|simple TARGET PATH"
+  case "$1" in
+    simple|branches);;
+    *) err $targpath ;;
+  esac
+  case "$2" in
+    *@*|localhost);;
+    *) err "expected: TARGET of form 'user@host' or 'localhost'" ;;
+  esac
+  [ "x$3" = x ] && err $targpath
+  pushtype="$1"
+  server="$2"
+  path="$3"
+}
+
+get_script () {
+  cat $BASH_SOURCE
+}
+
+
+# a cool advantage of inlining a script like this is that
+# you can inject vars, although I won't need to here.
+# this dose mean that $ must be escaped, though.
+post_receive () {
   
-  *)
-    cat readme.markdown >&2
-  ;;
-esac
+  case $1 in 
+    simple)
+cat <<SCRIPT
+#!/usr/bin/env bash
+#simple post-receive hook
+cd ..
+#passing in --git-dir=.git --work-tree=. is the magic word that makes it work
+git --git-dir=.git --work-tree=. checkout master --force
+[ -e update ] && ./update
+SCRIPT
+    ;;
+    branches)
+cat <<SCRIPT
+#!/usr/bin/env bash
+#branches post-receive hook
+while read -a line; do
+  branch=\${line[2]##refs/*/}
+  work_tree="../\$branch"
+  git_dir="\$PWD"
+  mkdir -p "\$work_tree"; pushd "\$work_tree"
+  git --work-tree "\$work_tree" --git-dir "\$git_dir" checkout "\$branch" --force
+  [ -e update ] && ./update
+  popd
+done
+SCRIPT
+    ;;
+    *)
+      err "expected: deploy post_receive simple|braches"
+    ;;
+  esac
+
+}
+
+
+#
+# simple:
+# git init
+# git config --add receive.denyCurrentBranch ignore
+# cat simple_post_receive_hook >> .git/hooks/post-receive
+# chmod +x .git/hooks/post-receive
+#
+# branches
+# git init --bare
+# git config --add receive.denyCurrentBranch ignore
+# cat branches_post_receive_hook >> ./hooks/post-receive
+# chmod +x ./hooks/post-receive
+
+
+init () {
+  [ $# -eq 2 ] || err "expected: deploy init simple|braches path"
+  pushtype="$1"
+  path="$2"
+  gitdir=.git
+  bare=
+  [ "$pushtype" = 'branches' ] && {
+    path="$path"/git
+    gitdir=.
+    bare='--bare'
+  }
+
+  mkdir -p "$path"; pushd "$path"
+  git init $bare
+  git config --add receive.denyCurrentBranch ignore
+  post_receive "$pushtype" > "$gitdir"/hooks/post-receive
+  chmod +x "$gitdir"/hooks/post-receive
+  popd
+}
+
+create () {
+
+  validate "$@"
+  local remote_path
+  if [ "$server" = 'localhost' ]; then
+    echo creating git deploy on localhost
+    init "$pushtype" "$path"
+    remote_path="$path"
+  else
+    echo "get_script | ssh $server \"bash -s init $pushtype $path\"";
+    get_script | ssh $server "bash -s init $pushtype $path";
+    remote_path="$server":"$path"
+  fi
+  git remote add deploy "$remote_path"
+
+}
+
+rationale () {
+
+cat <<RATIONALE
+  
+## Rationale:
+  
+### work with bash, not against it.
+
+be very simple. forget everything you learnt in that haskel tutorial
+anything more than:
+     
+```
+  var=command
+  ...
+  $var # exectute command stored in a var
+```
+
+...is being too clever
+
+
+### all in one file
+
+  * loading deps is arkward in bash, 
+  * easy to send script to server
+  * get \"templating\" via heredocs for free! 
+
+RATIONALE
+
+}
+
+
+#[ "$0" = "$BASH_SOURCE" ] && {
+
+  [ "`type -t $1`" = 'function' ] || usage
+  "$@"  
+
+#}

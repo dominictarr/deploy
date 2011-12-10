@@ -2,7 +2,7 @@
 
 tools to create setup a server for continous deployment via git push.
 
-## deploy create USER@HOST [projectname]
+## deploy create USER@HOST [--project projectname] [--remote name]
 
 create a git repo on HOST with projectname (or the basename of current dir)
 

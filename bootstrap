@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+#
+# this script assumes debian. 
+#
+# pull requests welcome.
+#
+
+#install prereqs
+
+#apt-get update -qq
+#apt-get install git-core curl build-essential openssl libssl-dev -qq
+
+#install nave
+
+useglobal () {
+  dir=$HOME/.nave/installed/$1/bin
+  pushd /usr/local/bin
+  for cmd in $(ls -1 $dir); do
+    rm -f $cmd
+    ln -s "$dir"/"$cmd" "$cmd"
+  done
+  popd
+}
+
+which nave || {
+  echo install nave
+  curl -sS https://raw.github.com/isaacs/nave/master/nave.sh > /usr/local/bin/nave
+  chmod +x /usr/local/bin/nave
+}
+
+version=${1:-stable}
+
+#get real node version
+case "$version" in
+  stable|latest) version=$(nave "$version");; 
+  *);;
+esac
+echo node version $version
+
+[ $(node -v 2>&1) = "$version" ] || {
+  echo install node@"$version"
+  nave install $version
+  useglobal $version
+}
+
+
+#install npm
+which npm || {
+  curl npmjs.org/install.sh | clean=no sh
+}

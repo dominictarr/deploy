@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-echo 'example update script'
-echo 'this should restart your service'
-pwd
-date
