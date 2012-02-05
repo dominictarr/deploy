@@ -83,7 +83,13 @@ while read -a line; do
   git_dir="\$PWD"
   mkdir -p "\$work_tree"; pushd "\$work_tree"
   git --work-tree "\$work_tree" --git-dir "\$git_dir" checkout "\$branch" --force
-  [ -e update ] && ./update
+  if [ -e update ] then 
+    ./update
+  else
+    # default is to `npm rebuild` and then call update to the admin
+    npm rebuild
+    curl localhost:9090/update/\$PWD
+  fi
   popd
 done
 SCRIPT
