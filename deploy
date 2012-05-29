@@ -149,7 +149,12 @@ create () {
     get_script | ssh $server "bash -s init $pushtype $path";
     remote_path="$server":"$path"
   fi
-  git remote add deploy "$remote_path"
+  git remote rm deploy
+  if [ "$pushtype" = simple ]; then
+    git remote add deploy "$remote_path"
+  else
+    git remote add deploy "$remote_path"/git
+  fi
 
 }
 
