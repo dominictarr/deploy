@@ -128,7 +128,8 @@ init () {
     bare='--bare'
   }
 
-  mkdir -p "$path"; pushd "$path"
+  mkdir -p "$path"
+  pushd "$path"
   git init $bare
   git config --add receive.denyCurrentBranch ignore
   post_receive "$pushtype" > "$gitdir"/hooks/post-receive
